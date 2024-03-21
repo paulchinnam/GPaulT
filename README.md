@@ -1,2 +1,3 @@
 # GPaulT
-A GPT trained to generate Avengers movie scripts
+
+GPTs trained for specific use cases

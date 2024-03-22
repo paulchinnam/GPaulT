@@ -25,7 +25,7 @@ torch.manual_seed(1337)
 # Avengers Infinity War Script for training
 # Read script in
 # !wget https://raw.githubusercontent.com/paulchinnam/GPaulT/main/TrainingData/MovieScripts/input.txt
-with open('./trainingData/MovieScripts/input.txt', 'r', encoding='utf-8') as f:
+with open('../trainingData/MovieScripts/input.txt', 'r', encoding='utf-8') as f:
   text = f.read()
 
 # Get all unique characters in dataset

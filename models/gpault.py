@@ -30,12 +30,28 @@ torch.manual_seed(1337)
 # Avengers Infinity War Script for training
 # Read script in
 # !wget https://raw.githubusercontent.com/paulchinnam/GPaulT/main/TrainingData/MovieScripts/input.txt
-with open('../trainingData/MovieScripts/input.txt', 'r', encoding='utf-8') as f:
-  text = f.read()
+# with open('../trainingData/MovieScripts/infinityWar.txt', 'r', encoding='utf-8') as f:
+#   text = f.read()
+
+# Read and concatenate all training data sets
+movie_scripts_dir = '../trainingData/MovieScripts' # Directory containing all the scripts
+script_files = [f for f in os.listdir(movie_scripts_dir) if f.endswith('.txt')]
+
+texts = []
+for script_file in script_files:
+    with open(os.path.join(movie_scripts_dir, script_file), 'r', encoding='utf-8') as f:
+        texts.append(f.read())
+
+text = ' '.join(texts)  # Concatenate all texts
+
+# Print length of dataset
+print("Length of dataset in characters: ", len(text))
 
 # Get all unique characters in dataset
 chars = sorted(list(set(text)))
 vocab_size = len(chars)
+
+print(f"Available characters: {chars}, vocabulary size: {vocab_size}")
 
 # Mapping from chars to integers
 stoi = {ch:i for i,ch in enumerate(chars)}

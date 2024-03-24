@@ -10,6 +10,7 @@ Original file is located at
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
+import os
 
 # Hyperparameters
 batch_size = 64 # Number of independent sequences processing in parallel
@@ -238,6 +239,23 @@ for iter in range(max_iters):
   loss.backward()
   optimizer.step()
 
-# Generate from the model
+# Create modelOutputs directory if it doesn't exist
+model_outputs_dir = 'modelOutputs'
+if not os.path.exists(model_outputs_dir):
+    os.makedirs(model_outputs_dir)
+
+# Set the full path for the output file
+output_file_path = os.path.join(model_outputs_dir, 'output.txt')
+
+# Generate from the model with max_new_tokens set to 10000
 context = torch.zeros((1, 1), dtype=torch.long, device=device)
-print(decode(m.generate(context, max_new_tokens=500)[0].tolist()))
+generated_sequence = m.generate(context, max_new_tokens=10000)[0].tolist()
+generated_text = decode(generated_sequence)
+
+# Write generated text to the output file
+with open(output_file_path, 'w', encoding='utf-8') as file:
+    file.write(generated_text)
+
+# Generate from the model
+# context = torch.zeros((1, 1), dtype=torch.long, device=device)
+# print(decode(m.generate(context, max_new_tokens=500)[0].tolist()))

@@ -27,12 +27,6 @@ dropout = 0.2
 
 torch.manual_seed(1337)
 
-# Avengers Infinity War Script for training
-# Read script in
-# !wget https://raw.githubusercontent.com/paulchinnam/GPaulT/main/TrainingData/MovieScripts/input.txt
-# with open('../trainingData/MovieScripts/infinityWar.txt', 'r', encoding='utf-8') as f:
-#   text = f.read()
-
 # Read and concatenate all training data sets
 movie_scripts_dir = '../trainingData/MovieScripts' # Directory containing all the scripts
 script_files = [f for f in os.listdir(movie_scripts_dir) if f.endswith('.txt')]
@@ -239,21 +233,46 @@ m = model.to(device)
 # Create pytorch optimizer
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
-for iter in range(max_iters):
+# Check for existence of the trained state dictionary
+model_state_directory = 'model_state'
+if not os.path.exists(model_state_directory):
+    os.makedirs(model_state_directory)
+    
+model_state_path = os.path.join(model_state_directory, 'gpault_state.pth')
 
-  # Evaluate the loss on the train and eval sets every once in a while
-  if iter % eval_interval == 0:
-    losses = estimate_loss()
-    print(f"Step {iter}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
+if os.path.isfile(model_state_path):
+  
+  # Load the model's state dict
+  model.load_state_dict(torch.load(model_state_path))
+  m = model.to(device)
 
-  # Get sample batch of data
-  xb, yb = get_batch('train')
+  # Set the model to evaluation mode after loading
+  m.eval()
 
-  # Evaluate loss
-  logits, loss = m(xb, yb)
-  optimizer.zero_grad(set_to_none=True)
-  loss.backward()
-  optimizer.step()
+else:
+
+  # Train the model
+  for iter in range(max_iters):
+
+    # Evaluate the loss on the train and eval sets every once in a while
+    if iter % eval_interval == 0:
+      losses = estimate_loss()
+      print(f"Step {iter}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
+
+    # Get sample batch of data
+    xb, yb = get_batch('train')
+
+    # Evaluate loss
+    logits, loss = m(xb, yb)
+    optimizer.zero_grad(set_to_none=True)
+    loss.backward()
+    optimizer.step()
+
+  # Save the model's state dict
+  torch.save(model.state_dict(), model_state_path)
+
+  # Set the model to evaluation mode
+  m.eval()
 
 # Create modelOutputs directory if it doesn't exist
 model_outputs_dir = 'modelOutputs'
@@ -271,7 +290,3 @@ generated_text = decode(generated_sequence)
 # Write generated text to the output file
 with open(output_file_path, 'w', encoding='utf-8') as file:
     file.write(generated_text)
-
-# Generate from the model
-# context = torch.zeros((1, 1), dtype=torch.long, device=device)
-# print(decode(m.generate(context, max_new_tokens=500)[0].tolist()))
